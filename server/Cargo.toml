@@ -1,0 +1,60 @@
+[package]
+name = "kgmusic"
+version = "1.7.0"
+edition = "2021"
+description = "KGmusic：酷狗 API 服务 + 前端静态文件托管（Rust）"
+# 本 crate 移植自 md3Music 的 kugou_api_server（AGPL-3.0），作为派生作品沿用同一许可证。
+# 仓库根目录的 LICENSING.md 说明了它与 web/（GPL-2.0-only）为何必须分开授权。
+license = "AGPL-3.0-only"
+
+[lib]
+name = "kgmusic"
+crate-type = ["rlib"]
+
+[[bin]]
+name = "kgmusic-server"
+path = "src/main.rs"
+
+[dependencies]
+tiny_http = "0.12"
+ureq = { version = "2", default-features = false, features = ["tls", "gzip", "json"] }
+md-5 = "0.10"
+sha1 = "0.10"
+sha2 = "0.10"
+aes = "0.8"
+rsa = { version = "0.9", features = ["pem", "sha2", "std"] }
+num-traits = "0.2"
+base64 = "0.22"
+flate2 = "1"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+libc = "0.2"
+# 小-MSS HTTPS 传输（mss_http.rs，黑名单大上行端点专用）：与 ureq 2.12 的
+# rustls 装配完全同版本/同特性（ring + webpki-roots），保证信任源一致
+rustls = { version = "0.23", default-features = false, features = ["ring", "logging", "std", "tls12"] }
+webpki-roots = "0.26"
+qrcode = { version = "0.14.0", features = ["image"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+# log 为日志门面：当前未接具体 logger，宏为 no-op
+log = "0.4"
+
+[patch.crates-io]
+tiny_http = { path = "vendor/tiny_http" }
+
+[profile.release]
+# P0: "s"（体积优先）禁用循环展开/函数内联，HTTP 服务器是 CPU 密集型
+# （加密/JSON），改为 opt-level = 3 追求运行时性能。
+# 注意：不使用 strip = true 以外的符号裁剪手段，保留完整符号便于线上回溯。
+opt-level = 3
+lto = true
+panic = "abort"
+
+[lints.clippy]
+# ModuleFn 的契约是 `fn(&Value, &Ctx) -> Result<ModuleResponse, ModuleResponse>`，
+# 与上游 JS 的 `module(query, requestFactory)` 一一对应，200+ 个 handler 共用。
+# ModuleResponse 约 152 字节，于是每个 handler 都会触发 result_large_err。
+# 要真正消除只能把 Err 改成 Box<ModuleResponse>，那是改动全部 handler 签名的
+# 架构级重构，换来的只是错误路径上少一次栈拷贝——收益与风险不成比例。
+# 这里显式放行这一个 lint；其余 clippy 默认 lint 保持全开。
+result_large_err = "allow"

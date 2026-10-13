@@ -1,0 +1,44 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>MoeKoe 萌音</title>
+    <meta name="theme-color" content="#FF91AF">
+    <meta name="description" content="MoeKoe 萌音,一个高颜值的kugou第三方播放器">
+    <meta name="author" content="MoeJue">
+    <meta name="url" content="https://MoeJue.cn/">
+    <meta name="keywords" content="MoeKoe,萌音,kugou,第三方播放器,阿珏酱">
+    <link href="/assets/font-awesome/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <script>
+        const getBrowserLocale = () => {
+            const browserLang = navigator.language;
+            if (browserLang.startsWith('zh')) {
+                if (browserLang === 'zh-TW' || browserLang === 'zh-HK') {
+                    return 'zh-TW';
+                }
+                return 'zh-CN';
+            }
+            const lang = browserLang.split('-')[0];
+            // 支持的非中文语言取自 src/language/。此处不能写 Object.keys(messages)：
+            // messages 是 i18n 模块内的局部常量，而这个内联脚本早于模块脚本执行，
+            // 引用它会在非中文浏览器上抛 ReferenceError（中文分支会提前 return，所以
+            // 一直没被发现），导致 <html lang> 设置失败。
+            const supportedLangs = ['en', 'ja', 'ko', 'ru'];
+            return supportedLangs.includes(lang) ? lang : 'ja';
+        };
+        const settings = JSON.parse(localStorage.getItem('settings'));
+        document.documentElement.lang = settings?.language || getBrowserLocale();
+    </script>
+</body>
+
+</html>
