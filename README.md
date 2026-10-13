@@ -69,7 +69,7 @@ KGmusic/
 **运行时只需要 Rust 工具链**（cargo >= 1.85）。前端构建产物 `web/dist/` 已随仓库提供，开箱即用。
 
 ```sh
-git clone <本仓库地址>
+git clone https://github.com/calculus07/KGmusic.git   # 或 git@github.com:calculus07/KGmusic.git（需配置 SSH 密钥）
 cd KGmusic
 cargo run --release --manifest-path server/Cargo.toml
 ```
