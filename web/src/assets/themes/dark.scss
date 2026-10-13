@@ -15,8 +15,10 @@ html.dark {
 
     background-color: $bg-dark;
     color: $text-primary;
-    filter: brightness(0.8);
-    mix-blend-mode: multiply;
+    // 只保留轻微的整体压暗。原为 brightness(0.8) + mix-blend-mode: multiply，
+    // 两者叠加会把整页压得过暗，且 mix-blend-mode 加在根元素上 backdrop 语义
+    // 未定义、各浏览器表现不一致，故移除。
+    filter: brightness(0.92);
 
     body {
         background-color: $bg-dark;
